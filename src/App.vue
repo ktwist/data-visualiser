@@ -10,7 +10,7 @@
       @update:selected="selectedIds = $event"
     />
     <VoltageLineChart
-      v-if="!loading && !error && selectedTransformers.length"
+      v-if="!loading && !error"
       :transformers="selectedTransformers"
       :all-transformers="transformers"
     />
