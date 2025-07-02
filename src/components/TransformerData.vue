@@ -18,13 +18,6 @@ const selectedIds = ref<number[]>(props.transformers.map(t => t.assetId));
 // Emit on change
 watch(selectedIds, (val) => emit('update:selected', val), { immediate: true });
 
-function toggle(id: number) {
-  if (selectedIds.value.includes(id)) {
-    selectedIds.value = selectedIds.value.filter(i => i !== id);
-  } else {
-    selectedIds.value.push(id);
-  }
-}
 </script>
 
 <template>
