@@ -1,3 +1,20 @@
+<template>
+  <div id="app">
+    <h1>Transformers Data</h1>
+    <div v-if="loading" class="loader">Loading data...</div>
+    <TransformerData
+      v-else
+      :transformers="transformers"
+      :loading="loading"
+      :error="error"
+    />
+    <VoltageLineChart
+      v-if="!loading && !error && transformers.length"
+      :transformers="transformers"
+    />
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import TransformerData from './components/TransformerData.vue';
@@ -8,11 +25,26 @@ const transformers = ref<TransformerAsset[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
+// Helper to simulate delay
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 onMounted(async () => {
   try {
     const response = await fetch('/sampledata.json');
     if (!response.ok) throw new Error('Failed to fetch data');
+    // Simulate long API response (e.g., 2 seconds)
+    await delay(2000);
     const data = await response.json();
+
+    // Sort each transformer's readings by timestamp (chronological order)
+    data.forEach((t: TransformerAsset) => {
+      t.lastTenVoltgageReadings.sort(
+        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+    });
+
     transformers.value = data as TransformerAsset[];
   } catch (err: any) {
     error.value = err.message;
@@ -22,14 +54,11 @@ onMounted(async () => {
 });
 </script>
 
-<template>
-  <div id="app">
-    <h1>Transformers Data</h1>
-    <TransformerData :transformers="transformers" :loading="loading" :error="error" />
-    <VoltageLineChart :transformers="transformers" />
-  </div>
-</template>
-
 <style>
-/* Add your styles here if needed */
+.loader {
+  margin: 2rem 0;
+  font-size: 1.2rem;
+  color: #377eb8;
+  text-align: center;
+}
 </style>
