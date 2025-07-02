@@ -36,10 +36,10 @@
         >{{ t.label }}</text>
       </g>
       <!-- Data lines -->
-      <g v-for="(t, idx) in transformers" :key="t.assetId">
+      <g v-for="t in transformers" :key="t.assetId">
         <polyline
           :points="getLinePoints(t)"
-          :stroke="colors[idx % colors.length]"
+          :stroke="getColor(t.assetId)"
           fill="none"
           stroke-width="2"
         />
@@ -50,7 +50,7 @@
       <line :x1="padding" :y1="padding" :x2="padding" :y2="height - padding" stroke="#333" />
     </svg>
     <div class="legend">
-      <span v-for="(t, idx) in transformers" :key="t.assetId" :style="{ color: colors[idx % colors.length] }">
+      <span v-for="t in allTransformers" :key="t.assetId" :style="{ color: getColor(t.assetId), opacity: transformers.some(sel => sel.assetId === t.assetId) ? 1 : 0.3 }">
         ● {{ t.name }}
       </span>
     </div>
@@ -62,7 +62,8 @@ import type { TransformerAsset } from '../types';
 import { computed } from 'vue';
 
 const props = defineProps<{
-  transformers: TransformerAsset[];
+  transformers: TransformerAsset[];      // selected
+  allTransformers: TransformerAsset[];   // all, for axis scaling and color
 }>();
 
 const width = 600;
@@ -70,16 +71,16 @@ const height = 300;
 const padding = 50;
 const colors = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#a65628'];
 
-// Gather all voltages for scaling
+// Use allTransformers for axis scaling
 const allVoltages = computed(() =>
-  props.transformers.flatMap(t => t.lastTenVoltgageReadings.map(r => Number(r.voltage)))
+  props.allTransformers.flatMap(t => t.lastTenVoltgageReadings.map(r => Number(r.voltage))).filter(v => !isNaN(v))
 );
-const minV = computed(() => Math.min(...allVoltages.value));
-const maxV = computed(() => Math.max(...allVoltages.value));
+const minV = computed(() => allVoltages.value.length ? Math.min(...allVoltages.value) : 0);
+const maxV = computed(() => allVoltages.value.length ? Math.max(...allVoltages.value) : 1);
 
-// X-axis ticks (timestamps)
+// X-axis ticks (timestamps from first transformer in allTransformers)
 const xLabels = computed(() => {
-  const first = props.transformers[0]?.lastTenVoltgageReadings ?? [];
+  const first = props.allTransformers[0]?.lastTenVoltgageReadings ?? [];
   return first.map(r => r.timestamp.slice(5, 10)); // MM-DD
 });
 const xTicks = computed(() => {
@@ -95,9 +96,10 @@ const xTicks = computed(() => {
 const yTicks = computed(() => {
   const ticks = 5;
   const values = [];
+  const range = maxV.value - minV.value || 1;
   for (let i = 0; i < ticks; i++) {
     const value = Math.round(maxV.value - ((maxV.value - minV.value) * i) / (ticks - 1));
-    const y = padding + ((maxV.value - value) / (maxV.value - minV.value || 1)) * (height - 2 * padding);
+    const y = padding + ((maxV.value - value) / range) * (height - 2 * padding);
     values.push({ value, y });
   }
   return values;
@@ -114,13 +116,18 @@ function getLinePoints(transformer: TransformerAsset) {
     const x = padding + i * stepX;
     let y;
     if (range === 0) {
-      // All voltages are the same, draw a straight line in the middle
       y = padding + (height - 2 * padding) / 2;
     } else {
       y = padding + ((maxV.value - Number(r.voltage)) / range) * (height - 2 * padding);
     }
     return `${x},${y}`;
   }).join(' ');
+}
+
+// Helper to get color by transformer's index in allTransformers
+function getColor(assetId: number) {
+  const idx = props.allTransformers.findIndex(t => t.assetId === assetId);
+  return colors[idx % colors.length];
 }
 </script>
 

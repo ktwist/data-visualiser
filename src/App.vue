@@ -7,16 +7,18 @@
       :transformers="transformers"
       :loading="loading"
       :error="error"
+      @update:selected="selectedIds = $event"
     />
     <VoltageLineChart
-      v-if="!loading && !error && transformers.length"
-      :transformers="transformers"
+      v-if="!loading && !error && selectedTransformers.length"
+      :transformers="selectedTransformers"
+      :all-transformers="transformers"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import TransformerData from './components/TransformerData.vue';
 import VoltageLineChart from './components/VoltageLineChart.vue';
 import type { TransformerAsset } from './types';
@@ -24,6 +26,11 @@ import type { TransformerAsset } from './types';
 const transformers = ref<TransformerAsset[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
+const selectedIds = ref<number[]>([]);
+
+const selectedTransformers = computed(() =>
+  transformers.value.filter(t => selectedIds.value.includes(t.assetId))
+);
 
 // Helper to simulate delay
 function delay(ms: number) {
