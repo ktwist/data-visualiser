@@ -23,18 +23,37 @@ watch(selectedIds, (val) => emit('update:selected', val), { immediate: true });
 <template>
   <div v-if="props.loading">Loading...</div>
   <div v-else-if="props.error">{{ props.error }}</div>
-  <div v-else>
-    <ul>
-      <li v-for="t in props.transformers" :key="t.assetId">
-        <label>
+  <div v-else class="transformer-list">
+    <div class="table-row"><span>&#x2713;</span><span>Name</span><span>Region</span><span>Health</span></div>
+      <div class="table-row" v-for="t in props.transformers" :key="t.assetId">
           <input
             type="checkbox"
             :value="t.assetId"
             v-model="selectedIds"
           />
-          {{ t.name }} ({{ t.region }}) - Health: {{ t.health }}
-        </label>
-      </li>
-    </ul>
+          <span>{{ t.name }}</span> <span>{{ t.region }}</span> <span>{{ t.health }}</span>
+      </div>
   </div>
 </template>
+
+<style scoped>
+.transformer-list {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+}
+.table-row {
+  display: flex;
+  font-weight: bold;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+
+}
+.table-row :first-child {
+  flex-grow: 0.5;
+}
+.table-row span {
+  flex-grow: 2;
+  padding: 5px 0;
+}
+</style>

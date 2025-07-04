@@ -1,6 +1,5 @@
 <template>
-  <div id="app">
-    <h1>Transformers Data</h1>
+    <h1 class="app-title">Transformers Data</h1>
     <div v-if="loading" class="loader">Loading data...</div>
     <TransformerData
       v-else
@@ -14,7 +13,6 @@
       :transformers="selectedTransformers"
       :all-transformers="transformers"
     />
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -62,6 +60,13 @@ onMounted(async () => {
 </script>
 
 <style>
+.app-title {
+  text-align: center;
+  padding: 1rem;
+  font-size: 2rem;
+  color: #f8a553;
+  border-bottom: #f8a553 2px solid;
+}
 .loader {
   margin: 2rem 0;
   font-size: 1.2rem;
