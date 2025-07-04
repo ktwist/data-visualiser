@@ -23,18 +23,53 @@ watch(selectedIds, (val) => emit('update:selected', val), { immediate: true });
 <template>
   <div v-if="props.loading">Loading...</div>
   <div v-else-if="props.error">{{ props.error }}</div>
-  <div v-else>
-    <ul>
-      <li v-for="t in props.transformers" :key="t.assetId">
-        <label>
-          <input
-            type="checkbox"
-            :value="t.assetId"
-            v-model="selectedIds"
-          />
-          {{ t.name }} ({{ t.region }}) - Health: {{ t.health }}
-        </label>
-      </li>
-    </ul>
+  <div v-else class="transformer-list">
+    <div class="table-row table-header"><span
+        class="checkmark">&#x2713;</span><span>Name</span><span>Region</span><span>Health</span></div>
+    <div class="table-row" v-for="t in props.transformers" :key="t.assetId">
+      <input type="checkbox" :value="t.assetId" v-model="selectedIds" />
+      <span>{{ t.name }}</span> <span>{{ t.region }}</span> <span>{{ t.health }}</span>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.transformer-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+  overflow-y: auto;
+  border: 2px solid #f89953;
+}
+
+.checkmark {
+  text-align: center;
+}
+
+.table-row.table-header {
+  color: #353637;
+  background-color: #f89953;
+  border-bottom: 2px solid #f89953;
+}
+
+.table-header span {
+  font-weight: bold;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 0.3fr 2fr 2fr 2fr;
+  grid-template-rows: subgrid;
+  justify-content: start;
+  border-bottom: 1px solid #f89953;
+}
+
+.transformer-list>.table-row:last-child {
+  border-bottom: 0px none;
+}
+
+.table-row span {
+  padding: 5px 0 5px 10px;
+  border-right: 1px solid #f89953;
+}
+</style>
