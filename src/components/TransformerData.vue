@@ -1,32 +1,39 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch, defineEmits } from 'vue';
 import type { TransformerAsset } from '../types';
 
-const transformers = ref<TransformerAsset[]>([]);
-const loading = ref(true);
-const error = ref<string | null>(null);
+const props = defineProps<{
+  transformers: TransformerAsset[];
+  loading: boolean;
+  error: string | null;
+}>();
 
-onMounted(async () => {
-  try {
-    const response = await fetch('/sampledata.json');
-    if (!response.ok) throw new Error('Failed to fetch data');
-    const data = await response.json();
-    transformers.value = data as TransformerAsset[];
-  } catch (err: any) {
-    error.value = err.message;
-  } finally {
-    loading.value = false;
-  }
-});
+const emit = defineEmits<{
+  (e: 'update:selected', ids: number[]): void;
+}>();
+
+// Track checked transformer IDs
+const selectedIds = ref<number[]>(props.transformers.map(t => t.assetId));
+
+// Emit on change
+watch(selectedIds, (val) => emit('update:selected', val), { immediate: true });
+
 </script>
 
 <template>
-  <div v-if="loading">Loading...</div>
-  <div v-else-if="error">{{ error }}</div>
+  <div v-if="props.loading">Loading...</div>
+  <div v-else-if="props.error">{{ props.error }}</div>
   <div v-else>
     <ul>
-      <li v-for="t in transformers" :key="t.assetId">
-        {{ t.name }} ({{ t.region }}) - Health: {{ t.health }}
+      <li v-for="t in props.transformers" :key="t.assetId">
+        <label>
+          <input
+            type="checkbox"
+            :value="t.assetId"
+            v-model="selectedIds"
+          />
+          {{ t.name }} ({{ t.region }}) - Health: {{ t.health }}
+        </label>
       </li>
     </ul>
   </div>
