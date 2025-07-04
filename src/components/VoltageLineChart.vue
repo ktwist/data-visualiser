@@ -2,73 +2,40 @@
   <div class="chart-container" style="position: relative;">
     <!-- Always visible info box below chart -->
     <div>
-    <svg :width="width" :height="height" @mousemove="onMouseMove" @mouseleave="onMouseLeave">
-      <!-- Y-axis ticks and labels -->
-      <g v-for="(v, i) in yTicks" :key="'y-tick-' + i">
-        <line
-          :x1="padding - 5"
-          :y1="v.y"
-          :x2="padding"
-          :y2="v.y"
-          stroke="#333"
-        />
-        <text
-          :x="padding - 10"
-          :y="v.y + 4"
-          text-anchor="end"
-          font-size="12"
-          fill="#999"
-        >{{ v.value }}</text>
-      </g>
-      <!-- X-axis ticks and labels -->
-      <g v-for="(t, i) in xTicks" :key="'x-tick-' + i">
-        <line
-          :x1="t.x"
-          :y1="height - padding"
-          :x2="t.x"
-          :y2="height - padding + 5"
-          stroke="#333"
-        />
-        <text
-          :x="t.x"
-          :y="height - padding + 18"
-          text-anchor="middle"
-          font-size="12"
-          fill="#999"
-        >{{ t.label }}</text>
-      </g>
-      <!-- Data lines -->
-      <g v-for="t in transformers" :key="t.assetId">
-        <polyline
-          :points="getLinePoints(t)"
-          :stroke="getColor(t.assetId)"
-          fill="none"
-          stroke-width="2"
-        />
-      </g>
-      <!-- Hover dot for nearest transformer only -->
-      <g v-if="hoverIndex !== null && nearestTransformer">
-        <circle
-          v-if="getDotPosition(nearestTransformer, hoverIndex)"
-          :cx="getDotPosition(nearestTransformer, hoverIndex)?.x"
-          :cy="getDotPosition(nearestTransformer, hoverIndex)?.y"
-          r="5"
-          :fill="getColor(nearestTransformer.assetId)"
-          stroke="#fff"
-          stroke-width="2"
-        />
-      </g>
-      <!-- X-axis -->
-      <line :x1="padding" :y1="height - padding" :x2="width - padding" :y2="height - padding" stroke="#333" />
-      <line :x1="padding" :y1="padding" :x2="padding" :y2="height - padding" stroke="#333" />
-    </svg>
-    <div class="legend">
-      <span v-for="t in allTransformers" :key="t.assetId" :style="{ color: getColor(t.assetId), opacity: transformers.some(sel => sel.assetId === t.assetId) ? 1 : 0.3 }">
-        ● {{ t.name }}
-      </span>
+      <svg :width="width" :height="height" @mousemove="onMouseMove" @mouseleave="onMouseLeave">
+        <!-- Y-axis ticks and labels -->
+        <g v-for="(v, i) in yTicks" :key="'y-tick-' + i">
+          <line :x1="padding - 5" :y1="v.y" :x2="padding" :y2="v.y" stroke="#999" />
+          <text :x="padding - 10" :y="v.y + 4" text-anchor="end" font-size="12" fill="#999">{{ v.value }}</text>
+        </g>
+        <!-- X-axis ticks and labels -->
+        <g v-for="(t, i) in xTicks" :key="'x-tick-' + i">
+          <line :x1="t.x" :y1="height - padding" :x2="t.x" :y2="height - padding + 5" stroke="#999" />
+          <text :x="t.x" :y="height - padding + 18" text-anchor="middle" font-size="12" fill="#999">{{ t.label }}</text>
+        </g>
+        <!-- Data lines -->
+        <g v-for="t in transformers" :key="t.assetId">
+          <polyline :points="getLinePoints(t)" :stroke="getColor(t.assetId)" fill="none" stroke-width="2" />
+        </g>
+        <!-- Hover dot for nearest transformer only -->
+        <g v-if="hoverIndex !== null && nearestTransformer">
+          <circle v-if="getDotPosition(nearestTransformer, hoverIndex)"
+            :cx="getDotPosition(nearestTransformer, hoverIndex)?.x"
+            :cy="getDotPosition(nearestTransformer, hoverIndex)?.y" r="5" :fill="getColor(nearestTransformer.assetId)"
+            stroke="#fff" stroke-width="2" />
+        </g>
+        <!-- X-axis -->
+        <line :x1="padding" :y1="height - padding" :x2="width - padding" :y2="height - padding" stroke="#999" />
+        <line :x1="padding" :y1="padding" :x2="padding" :y2="height - padding" stroke="#999" />
+      </svg>
+      <div class="legend">
+        <span v-for="t in allTransformers" :key="t.assetId"
+          :style="{ color: getColor(t.assetId), opacity: transformers.some(sel => sel.assetId === t.assetId) ? 1 : 0.3 }">
+          ● {{ t.name }}
+        </span>
+      </div>
     </div>
-  </div>
-  <div class="hover-info" style="margin-top: 12px;">
+    <div class="hover-info" style="margin-top: 12px;">
       <template v-if="hoverIndex !== null && nearestTransformer">
         <div class="hover-title" :style="{ color: getColor(nearestTransformer.assetId) }">
           ● {{ nearestTransformer.name }}
@@ -224,12 +191,14 @@ function getDotPosition(transformer: TransformerAsset, idx: number) {
   align-items: center;
   position: relative;
 }
+
 .legend {
   margin-top: 10px;
   display: flex;
   gap: 16px;
   font-size: 14px;
 }
+
 .hover-info {
   /* position: absolute; */
   width: 200px;
@@ -240,12 +209,13 @@ function getDotPosition(transformer: TransformerAsset, idx: number) {
   background: #192a3b;
   border: 1px solid #ccc;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   padding: 10px 16px;
   pointer-events: none;
   z-index: 10;
   text-align: left;
 }
+
 .hover-title {
   font-weight: bold;
   margin-bottom: 4px;
