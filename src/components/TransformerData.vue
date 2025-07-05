@@ -93,7 +93,7 @@ watch([selectedIds, filteredTransformers], () => {
 
 <style scoped>
 .transformer-data-wrapper {
-  max-width: 800px;
+  min-height: 266px;
 }
 
 .transformer-list {
