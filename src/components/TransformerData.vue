@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import type { TransformerAsset } from '../types';
 
 const props = defineProps<{
@@ -12,14 +12,43 @@ const emit = defineEmits<{
   (e: 'update:selected', ids: number[]): void;
 }>();
 
-const selectedIds = ref<number[]>(props.transformers.map(t => t.assetId));
+const LOCAL_STORAGE_KEY = 'transformers-data';
+
+// Load from localStorage if available, otherwise use props
+const localTransformers = ref<TransformerAsset[]>([]);
+
+const selectedIds = ref<number[]>([]);
+
+onMounted(() => {
+  const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (stored) {
+    try {
+      localTransformers.value = JSON.parse(stored);
+    } catch {
+      localTransformers.value = props.transformers;
+    }
+  } else {
+    localTransformers.value = props.transformers;
+  }
+});
+
+// Ensure all checkboxes are selected by default when data loads/changes
+watch(localTransformers, (val) => {
+  selectedIds.value = val.map(t => t.assetId);
+}, { immediate: true });
+
+// Persist to localStorage whenever localTransformers changes
+watch(localTransformers, (val) => {
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(val));
+}, { deep: true });
+
 const search = ref('');
 
 // Filtered transformers based on search
 const filteredTransformers = computed(() => {
-  if (!search.value.trim()) return props.transformers;
+  if (!search.value.trim()) return localTransformers.value;
   const s = search.value.trim().toLowerCase();
-  return props.transformers.filter(t =>
+  return localTransformers.value.filter(t =>
     t.name.toLowerCase().includes(s) ||
     t.region.toLowerCase().includes(s) ||
     t.health.toLowerCase().includes(s) ||
